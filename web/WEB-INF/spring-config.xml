@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean name="job1" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="com.aran.parts.TimerSchedule.quartz.myQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="timeout" value="50000"/>
+
+            </map>
+        </property>
+    </bean>
+
+    <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <!--        需要调用的job，ref指向了job1-->
+        <property name="jobDetail" ref="job1"/>
+        <!--        首次执行延迟，单位：毫秒-->
+        <property name="startDelay" value="2000"/>
+        <!--        周期执行间隔，单位：毫秒-->
+        <property name="repeatInterval" value="5000"/>
+    </bean>
+    <!--  调度触发器  -->
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="job1"/>
+        <property name="cronExpression" value="0/5 * * * * ?"/>
+    </bean>
+
+<!--    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+<!--        <property name="triggers">-->
+<!--            <list>-->
+<!--                <ref bean="cronTrigger"/>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+<!--    <task:scheduled-tasks>-->
+<!--        <task:scheduled ref="taskJob" method="job" cron="0/3 * * * * ?"/>-->
+<!--    </task:scheduled-tasks>-->
+
+    <context:component-scan base-package=" com.aran.parts.TimerSchedule.springTask " />
+
+    <context:annotation-config />
+    <task:annotation-driven scheduler="qbScheduler" mode="proxy"/>
+    <task:scheduler id="qbScheduler" pool-size="10"/>
+
+</beans>
